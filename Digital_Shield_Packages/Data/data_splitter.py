@@ -18,7 +18,7 @@ def split_data(df, target_col, test_size=0.3, random_state=42):
     y = df[target_col]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state, stratify=y
+        X, y, test_size=test_size, random_state=random_state
     )
 
     return X_train, X_test, y_train, y_test
