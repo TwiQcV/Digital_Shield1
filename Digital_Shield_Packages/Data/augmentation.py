@@ -10,10 +10,10 @@ def augment_data(X_train_processed, y_train):
 
     # Calculate desired counts
     sampling_strategy = {
-        'Critical': int(class_counts['Critical'] * 1.6),  # +60%
-        'High': int(class_counts['High'] * 1.7),          # +70%
-        'Low': int(class_counts['Low'] * 1.4),            # +40%
-        'Medium': class_counts['Medium']                  # unchanged
+    'Critical': 4369,  # 85% of majority
+    'High': 5141,      # Keep as is
+    'Low': 4369,       # Bring up
+    'Medium': 4369     # Bring up
     }
 
     # Apply SMOTE
