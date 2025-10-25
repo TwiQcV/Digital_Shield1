@@ -52,21 +52,34 @@ class DataLoader:
         return chunks
     
     def _create_record_chunk(self, row: pd.Series, idx: int) -> str:
-        """Create a text chunk for a single record"""
-        # Format the record as a comprehensive text description
+        """Create a text chunk for a single record with enhanced semantic information"""
+        # Create a more comprehensive and semantically rich text description
+        country = row.get('country', 'Unknown')
+        year = row.get('year', 'Unknown')
+        attack_type = row.get('attack type', 'Unknown')
+        target_industry = row.get('target industry', 'Unknown')
+        financial_loss = row.get('financial loss (in million $)', 0)
+        affected_users = row.get('number of affected users', 0)
+        vulnerability = row.get('security vulnerability type', 'Unknown')
+        defense = row.get('defense mechanism used', 'Unknown')
+        resolution_time = row.get('incident resolution time (in hours)', 0)
+        data_breach = row.get('data breach in gb', 0)
+        severity = row.get('severity_kmeans', 'Unknown')
+        
+        # Create a more natural, semantic description
         chunk_parts = [
-            f"Cybersecurity Incident #{idx + 1}",
-            f"Country: {row.get('country', 'Unknown')}",
-            f"Year: {row.get('year', 'Unknown')}",
-            f"Attack Type: {row.get('attack type', 'Unknown')}",
-            f"Target Industry: {row.get('target industry', 'Unknown')}",
-            f"Financial Loss: ${row.get('financial loss (in million $)', 0):.2f} million",
-            f"Affected Users: {row.get('number of affected users', 0):,.0f}",
-            f"Security Vulnerability: {row.get('security vulnerability type', 'Unknown')}",
-            f"Defense Mechanism: {row.get('defense mechanism used', 'Unknown')}",
-            f"Resolution Time: {row.get('incident resolution time (in hours)', 0):.1f} hours",
-            f"Data Breach Size: {row.get('data breach in gb', 0):.2f} GB",
-            f"Severity Level: {row.get('severity_kmeans', 'Unknown')}"
+            f"Cybersecurity incident in {country} during {year}",
+            f"Attack type: {attack_type} targeting {target_industry} industry",
+            f"Security vulnerability: {vulnerability}",
+            f"Defense mechanism: {defense}",
+            f"Financial impact: ${financial_loss:.2f} million in losses",
+            f"Users affected: {affected_users:,.0f} people",
+            f"Resolution time: {resolution_time:.1f} hours",
+            f"Data breach: {data_breach:.2f} GB of data compromised",
+            f"Severity classification: {severity}",
+            f"Incident details: {attack_type} attack on {target_industry} sector in {country}",
+            f"Security measures: {defense} was used to defend against {vulnerability}",
+            f"Impact assessment: {severity} severity with ${financial_loss:.2f}M financial loss"
         ]
         
         # Join with newlines and clean up
@@ -74,7 +87,7 @@ class DataLoader:
         return chunk.strip()
     
     def get_chunk_metadata(self, chunk_idx: int) -> Dict[str, Any]:
-        """Get metadata for a specific chunk"""
+        """Get comprehensive metadata for a specific chunk"""
         if self.df is None:
             self.load_data()
             
@@ -92,14 +105,26 @@ class DataLoader:
                 return value.item()
             return value
         
+        # Enhanced metadata with all useful fields
         return {
             'chunk_id': int(chunk_idx),
             'country': str(row.get('country', '')),
             'year': convert_to_python_type(row.get('year')),
             'attack_type': str(row.get('attack type', '')),
+            'target_industry': str(row.get('target industry', '')),
+            'security_vulnerability': str(row.get('security vulnerability type', '')),
+            'defense_mechanism': str(row.get('defense mechanism used', '')),
             'severity': str(row.get('severity_kmeans', '')),
             'financial_loss': convert_to_python_type(row.get('financial loss (in million $)')),
-            'affected_users': convert_to_python_type(row.get('number of affected users'))
+            'affected_users': convert_to_python_type(row.get('number of affected users')),
+            'resolution_time': convert_to_python_type(row.get('incident resolution time (in hours)')),
+            'data_breach_gb': convert_to_python_type(row.get('data breach in gb')),
+            # Additional semantic fields for better retrieval
+            'attack_category': str(row.get('attack type', '')).lower(),
+            'industry_category': str(row.get('target industry', '')).lower(),
+            'vulnerability_category': str(row.get('security vulnerability type', '')).lower(),
+            'defense_category': str(row.get('defense mechanism used', '')).lower(),
+            'severity_level': str(row.get('severity_kmeans', '')).lower()
         }
     
     def search_by_criteria(self, 

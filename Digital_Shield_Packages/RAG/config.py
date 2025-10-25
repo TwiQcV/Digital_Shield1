@@ -16,9 +16,9 @@ class RAGConfig:
     # Data file
     CSV_FILE = DATA_DIR / "Cleaned_Digital_Shield_with_severity.csv"
     
-    # Embedding settings
-    EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-    EMBEDDING_DIMENSION = 384
+    # Embedding settings - Using a more accurate model for better semantic understanding
+    EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+    EMBEDDING_DIMENSION = 768
     
     # Text chunking settings
     CHUNK_SIZE = 512
@@ -59,6 +59,30 @@ class RAGConfig:
         "number of affected users", 
         "incident resolution time (in hours)",
         "data breach in gb"
+    ]
+    
+    # Enhanced metadata fields for better retrieval and filtering
+    METADATA_FIELDS = [
+        "country",
+        "year", 
+        "attack type",
+        "target industry",
+        "security vulnerability type",
+        "defense mechanism used",
+        "severity_kmeans",
+        "financial loss (in million $)",
+        "number of affected users",
+        "incident resolution time (in hours)",
+        "data breach in gb"
+    ]
+    
+    # Fields for semantic search enhancement
+    SEMANTIC_FIELDS = [
+        "attack type",
+        "target industry", 
+        "security vulnerability type",
+        "defense mechanism used",
+        "severity_kmeans"
     ]
     
     @classmethod
