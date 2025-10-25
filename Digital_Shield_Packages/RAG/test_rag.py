@@ -9,8 +9,8 @@ import sys
 import logging
 from pathlib import Path
 
-# Add the project root to Python path
-project_root = Path(__file__).parent
+# Add the project root to Python path (two levels up from RAG folder)
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Suppress logging for cleaner output
@@ -32,14 +32,14 @@ def test_setup():
     
     # Test imports
     try:
-        from Digital_Shield_Packages.RAG.pipeline import RAGPipeline
+        from .pipeline import RAGPipeline
     except ImportError as e:
         print(f"❌ Failed to import RAGPipeline: {e}")
         return False
     
     # Test Gemini API
     try:
-        from Digital_Shield_Packages.RAG.llm_integration import get_gemini_provider
+        from .llm_integration import get_gemini_provider
         provider = get_gemini_provider()
         if not provider.is_available():
             print("❌ Gemini API not working")
@@ -53,7 +53,7 @@ def test_setup():
 def test_rag_system():
     """Test the RAG system with user input"""
     try:
-        from Digital_Shield_Packages.RAG.pipeline import RAGPipeline
+        from .pipeline import RAGPipeline
         
         pipeline = RAGPipeline()
         success = pipeline.initialize()

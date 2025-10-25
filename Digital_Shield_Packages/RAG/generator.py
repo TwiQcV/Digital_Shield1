@@ -23,110 +23,19 @@ class Generator:
     def generate_response(self, query: str, context: str, 
                         query_analysis: Dict[str, Any] = None,
                         statistical_summary: Dict[str, Any] = None) -> str:
-        """Generate a response based on query and context"""
+        """Generate a response based on query and context - GENERAL APPROACH"""
         try:
-            # Determine response type based on query analysis
-            if query_analysis and query_analysis.get('query_type') == 'statistical':
-                return self._generate_statistical_response(query, context, statistical_summary)
-            elif query_analysis and query_analysis.get('query_type') == 'comparative':
-                return self._generate_comparative_response(query, context)
-            elif query_analysis and query_analysis.get('query_type') == 'trend_analysis':
-                return self._generate_trend_response(query, context)
-            else:
-                return self._generate_general_response(query, context)
+            # Always enhance context with relevant statistical data for ANY query
+            enhanced_context = self._enhance_context_with_statistics(context, query_analysis)
+            
+            # Use the general LLM response for ALL queries - no hardcoded logic
+            return self._generate_general_response(query, enhanced_context)
                 
         except Exception as e:
             logger.error(f"Error generating response: {e}")
             return self._generate_error_response()
     
-    def _generate_statistical_response(self, query: str, context: str, 
-                                     stats: Dict[str, Any] = None) -> str:
-        """Generate a statistical response"""
-        try:
-            if not stats:
-                return self._generate_general_response(query, context)
-            
-            response_parts = [
-                f"**Key Statistics:**",
-                f"**Total Incidents Analyzed:** {stats.get('total_documents', 'N/A')}",
-                f"**Average Financial Loss:** ${stats.get('avg_financial_loss', 0):.2f} million",
-                f"**Total Affected Users:** {stats.get('total_affected_users', 0):,}",
-                f"**Average Similarity Score:** {stats.get('avg_similarity', 0):.3f}",
-                ""
-            ]
-            
-            # Add distribution data
-            if stats.get('country_distribution'):
-                response_parts.append("**Countries Affected:**")
-                for country, count in list(stats['country_distribution'].items())[:5]:
-                    response_parts.append(f"- {country}: {count} incidents")
-                response_parts.append("")
-            
-            if stats.get('attack_type_distribution'):
-                response_parts.append("**Attack Types:**")
-                for attack_type, count in list(stats['attack_type_distribution'].items())[:5]:
-                    response_parts.append(f"- {attack_type}: {count} incidents")
-                response_parts.append("")
-            
-            if stats.get('severity_distribution'):
-                response_parts.append("**Severity Distribution:**")
-                for severity, count in stats['severity_distribution'].items():
-                    response_parts.append(f"- {severity}: {count} incidents")
-                response_parts.append("")
-            
-            # Add context summary
-            response_parts.extend([
-                "**Relevant Incidents:**",
-                context[:1000] + "..." if len(context) > 1000 else context
-            ])
-            
-            return "\n".join(response_parts)
-            
-        except Exception as e:
-            logger.error(f"Error generating statistical response: {e}")
-            return self._generate_general_response(query, context)
     
-    def _generate_comparative_response(self, query: str, context: str) -> str:
-        """Generate a comparative response"""
-        try:
-            response_parts = [
-                "Here's a comparative analysis based on the cybersecurity data:",
-                "",
-                "**Key Comparisons:**",
-                "",
-                context[:1500] + "..." if len(context) > 1500 else context,
-                "",
-                "**Analysis:**",
-                "The data shows variations in attack patterns, financial impacts, and resolution times across different categories. This comparison helps identify trends and patterns in cybersecurity incidents."
-            ]
-            
-            return "\n".join(response_parts)
-            
-        except Exception as e:
-            logger.error(f"Error generating comparative response: {e}")
-            return self._generate_general_response(query, context)
-    
-    def _generate_trend_response(self, query: str, context: str) -> str:
-        """Generate a trend analysis response"""
-        try:
-            response_parts = [
-                "Here's a trend analysis based on the cybersecurity data:",
-                "",
-                "**Trend Analysis:**",
-                "",
-                context[:1500] + "..." if len(context) > 1500 else context,
-                "",
-                "**Key Insights:**",
-                "- The data reveals patterns in attack frequency and impact over time",
-                "- Financial losses and affected user counts show varying trends",
-                "- Different attack types demonstrate different temporal patterns"
-            ]
-            
-            return "\n".join(response_parts)
-            
-        except Exception as e:
-            logger.error(f"Error generating trend response: {e}")
-            return self._generate_general_response(query, context)
     
     def _generate_general_response(self, query: str, context: str) -> str:
         """Generate a general response using Gemini API"""
@@ -225,6 +134,96 @@ class Generator:
             logger.error(f"Error generating summary: {e}")
             return "Error generating summary."
     
+    def _enhance_context_with_statistics(self, context: str, query_analysis: Dict[str, Any] = None) -> str:
+        """Dynamically enhance context with relevant statistical data for ANY query"""
+        try:
+            # Get actual dataset statistics
+            stats = self._get_actual_dataset_statistics()
+            if not stats:
+                return context
+            
+            # Create a natural cybersecurity analysis overview
+            stats_context = []
+            stats_context.append("**Cybersecurity Threat Analysis:**")
+            stats_context.append("")
+            
+            # Always include key statistics that are useful for most queries
+            country_dist = stats.get('country_distribution', {})
+            if country_dist:
+                stats_context.append("**Geographic Impact Analysis:**")
+                for country, count in list(country_dist.items())[:5]:
+                    stats_context.append(f"- {country}: {count} incidents")
+                stats_context.append("")
+            
+            attack_dist = stats.get('attack_type_distribution', {})
+            if attack_dist:
+                stats_context.append("**Threat Landscape Overview:**")
+                for attack_type, count in list(attack_dist.items())[:5]:
+                    stats_context.append(f"- {attack_type}: {count} incidents")
+                stats_context.append("")
+            
+            industry_dist = stats.get('industry_distribution', {})
+            if industry_dist:
+                stats_context.append("**Industry Vulnerability Assessment:**")
+                for industry, count in list(industry_dist.items())[:5]:
+                    stats_context.append(f"- {industry}: {count} incidents")
+                stats_context.append("")
+            
+            severity_dist = stats.get('severity_distribution', {})
+            if severity_dist:
+                stats_context.append("**Incident Severity Distribution:**")
+                for severity, count in severity_dist.items():
+                    stats_context.append(f"- {severity}: {count} incidents")
+                stats_context.append("")
+            
+            # Add general analysis info
+            stats_context.append(f"**Analysis Summary:**")
+            stats_context.append(f"- Total incidents analyzed: {stats.get('total_records', 'N/A')}")
+            stats_context.append(f"- Average financial impact: ${stats.get('avg_financial_loss', 0):.2f} million")
+            stats_context.append(f"- Total users affected: {stats.get('total_affected_users', 0):,}")
+            stats_context.append(f"- Analysis period: {stats.get('year_range', ('N/A', 'N/A'))[0]} - {stats.get('year_range', ('N/A', 'N/A'))[1]}")
+            stats_context.append("")
+            
+            # Combine with sample incidents
+            enhanced_context = "\n".join(stats_context) + "\n**Recent Incident Examples:**\n" + context
+            return enhanced_context
+            
+        except Exception as e:
+            logger.error(f"Error enhancing context with statistics: {e}")
+            return context
+
+    def _get_actual_dataset_statistics(self) -> Dict[str, Any]:
+        """Get actual statistics from the full dataset"""
+        try:
+            import pandas as pd
+            from pathlib import Path
+            
+            # Load the actual dataset
+            csv_file = Path("Digital_Shield_data/proccesed/Cleaned_Digital_Shield_with_severity.csv")
+            if not csv_file.exists():
+                logger.error(f"Dataset file not found: {csv_file}")
+                return None
+                
+            df = pd.read_csv(csv_file)
+            
+            # Calculate actual statistics
+            stats = {
+                'total_records': len(df),
+                'country_distribution': df['country'].value_counts().to_dict(),
+                'attack_type_distribution': df['attack type'].value_counts().to_dict(),
+                'industry_distribution': df['target industry'].value_counts().to_dict(),
+                'severity_distribution': df['severity_kmeans'].value_counts().to_dict(),
+                'avg_financial_loss': df['financial loss (in million $)'].mean(),
+                'total_affected_users': df['number of affected users'].sum(),
+                'year_range': (df['year'].min(), df['year'].max())
+            }
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error getting actual dataset statistics: {e}")
+            return None
+
     def generate_insights(self, documents: List[Dict[str, Any]]) -> List[str]:
         """Generate insights from the documents"""
         try:
