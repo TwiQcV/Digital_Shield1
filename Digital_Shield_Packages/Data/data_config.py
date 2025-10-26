@@ -1,6 +1,19 @@
+import os
 # File paths
-RAW_DATA_PATH = "/home/nawaf/code/TwiQcV/Digital_Shield1/Digital_Shield_data/raw/Digital_Shield_dataset.csv"
-CLEANED_DATA_PATH = "/home/nawaf/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Digital_Shield_cleaned.csv"
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+RAW_DATA_PATH = os.path.join(
+    os.path.expanduser("~"),
+    "code", "TwiQcV", "Digital_Shield1",
+    "Digital_Shield_data", "raw", "Digital_Shield_dataset.csv"
+)
+
+# For CLEANED_DATA_PATH
+CLEANED_DATA_PATH = os.path.join(
+    os.path.expanduser("~"),
+    "code", "TwiQcV", "Digital_Shield1",
+    "Digital_Shield_data", "proccesed", "Digital_Shield_cleaned.csv"
+)
 
 # Text columns to normalize
 TEXT_COLUMNS = [
