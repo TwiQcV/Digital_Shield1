@@ -2,7 +2,8 @@
 scikit-learn
 pandas
 numpy
-
+xgboost
+streamlit
 
 
 
@@ -10,17 +11,17 @@ numpy
 # ==============================================
 # comment if you dont want to use the RAG system
 # RAG system dependencies
-sentence-transformers>=2.2.2
-chromadb>=0.4.0
-langchain>=0.1.0
-faiss-cpu>=1.7.4
+# sentence-transformers>=2.2.2
+# chromadb>=0.4.0
+# langchain>=0.1.0
+# faiss-cpu>=1.7.4
 
-# LLM dependencies
-google-generativeai>=0.3.0
-python-dotenv>=1.0.0
+# # LLM dependencies
+# google-generativeai>=0.3.0
+# python-dotenv>=1.0.0
 
 
-# Development and testing
-pytest>=7.0.0
+# # Development and testing
+# pytest>=7.0.0
 # ==============================================
 # comment if you dont want to use the RAG system
