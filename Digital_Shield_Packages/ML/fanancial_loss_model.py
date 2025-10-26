@@ -124,7 +124,7 @@ class DataLoader:
         """
         if csv_filenames is None:
             csv_filenames = [
-                "/home/nawaf/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Data Augmentetion.csv",
+                "/home/majid/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Data Augmentetion.csv",
                 "./Data Augmentetion.csv",
                 "./Data Augmentation.csv"
             ]

@@ -1,6 +1,6 @@
 # File paths
-RAW_DATA_PATH = "/home/nawaf/code/TwiQcV/Digital_Shield1/Digital_Shield_data/raw/Digital_Shield_dataset.csv"
-CLEANED_DATA_PATH = "/home/nawaf/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Digital_Shield_cleaned.csv"
+RAW_DATA_PATH = "/home/majid/code/TwiQcV/Digital_Shield1/Digital_Shield_data/raw/Digital_Shield_dataset.csv"
+CLEANED_DATA_PATH = "/home/majid/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Digital_Shield_cleaned.csv"
 
 # Text columns to normalize
 TEXT_COLUMNS = [
