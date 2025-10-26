@@ -4,5 +4,6 @@ Digital_Shield_data/
 .ipynb_checkpoints
 jupyter.txt
 Digital_Shield_Notebooks/
-__pycache__/
+pycache/
 .DS_Store
+Digital_Shield_Packages/models/
