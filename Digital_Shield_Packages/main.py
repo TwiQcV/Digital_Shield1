@@ -17,18 +17,9 @@ from Data.data_config import (
 )
 
 from Data.data_cleaner import DataCleaner
-from Data.data_splitter import split_data
-from Data.encoding import apply_one_hot_encoding
-from Data.augmentation import augment_data
 from Data.clusterer import add_severity_to_dataset
 
 # Import ML modules
-from ML.severity_model import (
-    train_severity_model,
-    load_severity_model,
-    predict_with_model,
-    evaluate_model
-)
 
 from ML.config import (
     MODEL_SAVE_PATH,
@@ -49,7 +40,7 @@ from ML.fanancial_loss_model import (
 )
 
 # Configuration
-DATA_PATH = "/home/nawaf/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Data Augmentetion.csv"
+from ML.config import DATA_PATH
 MODEL_SAVE_PATH_FINANCIAL = "models/financial_loss_xgboost.pkl"
 DEFAULT_TEST_SIZE = 0.2
 DEFAULT_N_FOLDS = 5
@@ -122,126 +113,6 @@ def run_clustering(df, feature_column: str = "financial loss (in million $)") ->
 
     except Exception as e:
         print(f"❌ Severity clustering failed: {str(e)}")
-        sys.exit(1)
-
-
-def run_data_splitting(df, target_col: str = "severity_kmeans", test_size: float = None):
-    """Execute data splitting."""
-    print("\n" + "="*70)
-    print("STEP 2: DATA SPLITTING")
-    print("="*70)
-
-    if test_size is None:
-        test_size = TEST_SIZE
-
-    try:
-        X_train, X_test, y_train, y_test = split_data(
-            df=df,
-            target_col=target_col,
-            test_size=test_size,
-            random_state=RANDOM_STATE
-        )
-
-        print(f"\n✅ Data split successfully:")
-        print(f"   Training set: {X_train.shape} rows × {X_train.shape} features")
-        print(f"   Test set: {X_test.shape} rows × {X_test.shape} features")
-
-        return X_train, X_test, y_train, y_test
-
-    except Exception as e:
-        print(f"❌ Data splitting failed: {str(e)}")
-        sys.exit(1)
-
-
-def run_encoding(X_train, X_test):
-    """Execute feature encoding."""
-    print("\n" + "="*70)
-    print("STEP 3: FEATURE ENCODING")
-    print("="*70)
-
-    try:
-        X_train_encoded, X_test_encoded = apply_one_hot_encoding(X_train, X_test)
-
-        print(f"\n✅ Encoding completed:")
-        print(f"   Training set: {X_train_encoded.shape}")
-        print(f"   Test set: {X_test_encoded.shape}")
-
-        return X_train_encoded, X_test_encoded
-
-    except Exception as e:
-        print(f"❌ Feature encoding failed: {str(e)}")
-        sys.exit(1)
-
-
-def run_augmentation(X_train_encoded, y_train):
-    """Execute data augmentation."""
-    print("\n" + "="*70)
-    print("STEP 4: DATA AUGMENTATION (SMOTE)")
-    print("="*70)
-
-    try:
-        X_train_aug, y_train_aug, balanced_df = augment_data(X_train_encoded, y_train)
-
-        print(f"\n✅ Data augmentation completed:")
-        print(f"   Augmented training set: {X_train_aug.shape} rows × {X_train_aug.shape} features")
-
-        return X_train_aug, y_train_aug, balanced_df
-
-    except Exception as e:
-        print(f"❌ Data augmentation failed: {str(e)}")
-        sys.exit(1)
-
-
-def run_model_training(X_train_aug, X_test_encoded, y_train_aug, y_test, save_path: str = None):
-    """Execute severity model training and save."""
-    print("\n" + "="*70)
-    print("STEP 5: MODEL TRAINING")
-    print("="*70)
-
-    try:
-        results = train_severity_model(
-            X_train_aug=X_train_aug,
-            X_test_encoded=X_test_encoded,
-            y_train_aug=y_train_aug,
-            y_test=y_test,
-            selected_columns=SELECTED_FEATURES,
-            save_path=save_path
-        )
-
-        accuracy = evaluate_model(results)
-
-        print(f"\n✅ Model trained successfully!")
-        print(f"   Test Accuracy: {accuracy:.4f}")
-        print(f"   CV Mean: {results['cv_mean']:.4f}")
-
-        if save_path:
-            print(f"   💾 Model saved: {results.get('model_path', save_path)}")
-
-        return results
-
-    except Exception as e:
-        print(f"❌ Model training failed: {str(e)}")
-        sys.exit(1)
-
-
-def run_model_inference(model_path: str, X_test_encoded):
-    """Load and use saved model for inference."""
-    print("\n" + "="*70)
-    print("STEP 5: MODEL INFERENCE (USING SAVED MODEL)")
-    print("="*70)
-
-    try:
-        model = load_severity_model(model_path)
-        predictions = predict_with_model(model_path, X_test_encoded[SELECTED_FEATURES])
-
-        print(f"\n✅ Model loaded and predictions made!")
-        print(f"   Total predictions: {len(predictions)}")
-        print(f"   Unique classes: {len(set(predictions))}")
-
-        return predictions
-
-    except Exception as e:
-        print(f"❌ Model inference failed: {str(e)}")
         sys.exit(1)
 
 
@@ -467,20 +338,10 @@ Examples:
 
         cleaned_df = run_data_cleaning(RAW_DATA_PATH, CLEANED_DATA_PATH)
         cleaned_df = run_clustering(cleaned_df)
-        X_train, X_test, y_train, y_test = run_data_splitting(cleaned_df)
-        X_train_encoded, X_test_encoded = run_encoding(X_train, X_test)
-
-        predictions = run_model_inference(MODEL_SAVE_PATH, X_test_encoded)
 
         if not args.skip_financial:
             results_financial = run_financial_loss_inference(test_size=args.test_size or DEFAULT_TEST_SIZE)
 
-        print(f"\n✅ INFERENCE COMPLETED (BOTH MODELS)")
-        print(f"\n📊 Results Summary:")
-        print(f"   Severity model predictions: {len(predictions_severity)} samples")
-        if not args.skip_financial:
-            print(f"   Financial loss model R²: {results_financial['metrics']['R2']:.4f}")
-        return
 
     # MODE 2: Full training pipeline
     if not validate_paths(RAW_DATA_PATH):
@@ -488,18 +349,6 @@ Examples:
 
     cleaned_df = run_data_cleaning(RAW_DATA_PATH, CLEANED_DATA_PATH)
     cleaned_df = run_clustering(cleaned_df)
-    X_train, X_test, y_train, y_test = run_data_splitting(cleaned_df, test_size=args.test_size)
-    X_train_encoded, X_test_encoded = run_encoding(X_train, X_test)
-
-    if not args.skip_augment:
-        X_train_aug, y_train_aug, _ = run_augmentation(X_train_encoded, y_train)
-    else:
-        X_train_aug, y_train_aug = X_train_encoded, y_train
-
-    if not args.skip_training:
-        results = run_model_training(X_train_aug, X_test_encoded, y_train_aug, y_test, save_path=MODEL_SAVE_PATH)
-    else:
-        results = None
 
     if not args.skip_financial:
         results_financial = run_financial_loss_training(
@@ -515,11 +364,6 @@ Examples:
     print("✅ PIPELINE COMPLETED SUCCESSFULLY")
     print("="*70)
 
-    if results:
-        print(f"\n🎯 Model Results:")
-        print(f"   Test Accuracy: {results['accuracy']:.4f}")
-        print(f"   CV Mean: {results['cv_mean']:.4f}")
-        print(f"   Model saved: {results.get('model_path', MODEL_SAVE_PATH)}")
 
     if results_financial:
         print(f"\n🎯 Financial Loss Model Results:")
