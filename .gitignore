@@ -6,3 +6,4 @@ jupyter.txt
 Digital_Shield_Notebooks/
 __pycache__/
 .DS_Store
+Digital_Shield_Packages/models/
