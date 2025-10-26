@@ -5,7 +5,7 @@ import joblib
 from pathlib import Path
 from typing import Tuple, List, Dict, Optional
 from datetime import datetime
-
+import os
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
@@ -92,19 +92,19 @@ class ModelSaver:
     def _save_summary(model_path: str, metrics: Dict, summary_path: str) -> None:
         """Save model summary as text file"""
         summary_text = f"""
-XGBoost Financial Loss Prediction Model Summary
-{'='*60}
-Model Path: {model_path}
-Saved: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-Performance Metrics:
-{'-'*60}
-MAE:        {metrics.get('MAE', 'N/A'):,.3f}
-Median AE:  {metrics.get('Median_AE', 'N/A'):,.3f}
-RMSE:       {metrics.get('RMSE', 'N/A'):,.3f}
-R²:         {metrics.get('R2', 'N/A'):,.4f}
-sMAPE:      {metrics.get('sMAPE', 'N/A'):,.2f}%
-Note: Use ModelSaver.load_model() to restore this model
-"""
+    XGBoost Financial Loss Prediction Model Summary
+    {'='*60}
+    Model Path: {model_path}
+    Saved: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    Performance Metrics:
+    {'-'*60}
+    MAE:        {metrics.get('MAE', 'N/A'):,.3f}
+    Median AE:  {metrics.get('Median_AE', 'N/A'):,.3f}
+    RMSE:       {metrics.get('RMSE', 'N/A'):,.3f}
+    R²:         {metrics.get('R2', 'N/A'):,.4f}
+    sMAPE:      {metrics.get('sMAPE', 'N/A'):,.2f}%
+    Note: Use ModelSaver.load_model() to restore this model
+    """
         Path(summary_path).write_text(summary_text)
 
 
@@ -116,18 +116,41 @@ class DataLoader:
         """
         Load CSV file from specified filenames or defaults
         Args:
-            csv_filenames: List of filenames to try. Defaults to common variations.
+        csv_filenames: List of filenames to try. Defaults to common variations.
         Returns:
-            DataFrame with raw data
+        DataFrame with raw data
         Raises:
-            AssertionError: If no CSV file found
+        AssertionError: If no CSV file found
         """
+    # Get project root (two levels up from current file)
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
         if csv_filenames is None:
-            csv_filenames = [
-                "/home/majid/code/TwiQcV/Digital_Shield1/Digital_Shield_data/proccesed/Data Augmentetion.csv",
-                "./Data Augmentetion.csv",
-                "./Data Augmentation.csv"
-            ]
+        # Build paths using os.path.join for cross-platform compatibility
+        # Try multiple possible directory structures
+            possible_data_dirs = [
+            os.path.join(project_root, 'Digital_Shield_data', 'proccesed'),
+            os.path.join(project_root, 'Digital_Shield1', 'Digital_Shield_data', 'proccesed'),
+            os.path.join(project_root, '..', 'Digital_Shield_data', 'proccesed'),  # One level up
+            os.path.join(project_root, '..', 'Digital_Shield1', 'Digital_Shield_data', 'proccesed'),  # One level up
+        ]
+
+        csv_filenames = []
+        for data_dir in possible_data_dirs:
+            csv_filenames.extend([
+                os.path.join(data_dir, 'Data Augmentetion.csv'),
+                os.path.join(data_dir, 'Data Augmentation.csv'),
+            ])
+
+        # Add relative paths and current directory
+        csv_filenames.extend([
+            "./Data Augmentetion.csv",
+            "./Data Augmentation.csv",
+            "Data Augmentetion.csv",
+            "Data Augmentation.csv"
+        ])
+
+    # Debug: Print what paths we're checking
 
         csv = next((Path(p) for p in csv_filenames if Path(p).exists()), None)
         assert csv is not None, f"CSV file not found. Tried: {csv_filenames}"
