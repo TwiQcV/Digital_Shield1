@@ -162,9 +162,22 @@ st.markdown("""
 def load_model():
     """Load the trained financial loss model"""
     try:
-        model_path = "models/financial_loss_xgboost.pkl"
-        if not os.path.exists(model_path):
-            st.error(f"Model file not found at: {model_path}")
+        # Try multiple possible paths for the model
+        possible_paths = [
+            "Digital_Shield_Packages/models/financial_loss_xgboost.pkl",
+            "models/financial_loss_xgboost.pkl",
+            os.path.join(project_root, "Digital_Shield_Packages", "models", "financial_loss_xgboost.pkl"),
+            os.path.join(project_root, "models", "financial_loss_xgboost.pkl")
+        ]
+        
+        model_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                model_path = path
+                break
+        
+        if model_path is None:
+            st.error(f"Model file not found. Tried paths: {possible_paths}")
             return None
         
         model_artifact = ModelSaver.load_model(model_path)
@@ -176,50 +189,157 @@ def load_model():
 def get_smart_defaults(attack_type, target_industry, affected_users, data_breach_gb):
     """Calculate smart defaults based on user inputs"""
     
-    # Resolution time based on attack type (in hours)
-    resolution_times = {
-        'DDoS': 12,                    # 12 hours - usually resolved quickly
-        'Malware': 48,                 # 2 days - requires cleanup
-        'Man-in-the-middle': 24,       # 1 day - network issue
-        'Phishing': 24,                # 1 day - user training
-        'Ransomware': 72,              # 3 days - complex recovery
-        'SQL Injection': 36            # 1.5 days - database fix
+    # Resolution time based on attack type and severity (in hours)
+    base_resolution_times = {
+        'DDoS': 8,                     # 8 hours - usually resolved quickly
+        'Malware': 24,                 # 1 day - requires cleanup
+        'Man-in-the-middle': 12,       # 12 hours - network issue
+        'Phishing': 6,                 # 6 hours - user training/notification
+        'Ransomware': 48,              # 2 days - complex recovery
+        'SQL Injection': 18            # 18 hours - database fix
     }
     
-    # Vulnerability type based on attack type
-    vulnerability_mapping = {
-        'DDoS': 'Unpatched Software',
-        'Malware': 'Social Engineering',
-        'Man-in-the-middle': 'Weak Passwords',
-        'Phishing': 'Social Engineering',
-        'Ransomware': 'Social Engineering',
-        'SQL Injection': 'Unpatched Software'
+    # Calculate resolution time based on severity
+    base_time = base_resolution_times.get(attack_type, 24)
+    
+    # Adjust resolution time based on affected users and data breach size
+    if affected_users >= 1000000 or data_breach_gb >= 1000:
+        resolution_time = base_time * 2.5  # Major incidents take longer
+    elif affected_users >= 100000 or data_breach_gb >= 100:
+        resolution_time = base_time * 1.8  # Medium incidents
+    elif affected_users >= 10000 or data_breach_gb >= 10:
+        resolution_time = base_time * 1.3  # Small incidents
+    else:
+        resolution_time = base_time  # Minimal impact
+    
+    # Cap resolution time at reasonable limits
+    resolution_time = min(resolution_time, 168)  # Max 1 week
+    
+    # Comprehensive vulnerability mapping with multiple options per attack type
+    vulnerability_options = {
+        'DDoS': ['Unpatched Software', 'Weak Passwords', 'Zero Day'],
+        'Malware': ['Social Engineering', 'Unpatched Software', 'Weak Passwords'],
+        'Man-in-the-middle': ['Weak Passwords', 'Unpatched Software', 'Social Engineering'],
+        'Phishing': ['Social Engineering', 'Weak Passwords', 'Unpatched Software'],
+        'Ransomware': ['Social Engineering', 'Unpatched Software', 'Weak Passwords'],
+        'SQL Injection': ['Unpatched Software', 'Weak Passwords', 'Zero Day']
     }
     
-    # Defense mechanism based on attack type
-    defense_mapping = {
-        'DDoS': 'Firewall',
-        'Malware': 'Antivirus',
-        'Man-in-the-middle': 'Encryption',
-        'Phishing': 'AI-based Detection',
-        'Ransomware': 'Encryption',
-        'SQL Injection': 'Firewall'
+    # Comprehensive defense mechanism mapping with multiple options per attack type
+    defense_options = {
+        'DDoS': ['Firewall', 'VPN', 'AI-based Detection'],
+        'Malware': ['Antivirus', 'AI-based Detection', 'Encryption'],
+        'Man-in-the-middle': ['Encryption', 'VPN', 'Firewall'],
+        'Phishing': ['AI-based Detection', 'Antivirus', 'Encryption'],
+        'Ransomware': ['Encryption', 'AI-based Detection', 'Antivirus'],
+        'SQL Injection': ['Firewall', 'Encryption', 'AI-based Detection']
     }
     
-    # Calculate severity based on affected users and data breach size
-    if affected_users > 1000000 or data_breach_gb > 1000:
+    # Calculate severity based on multiple factors (more realistic conditions)
+    severity_score = 0
+    
+    # User impact scoring
+    if affected_users >= 10000000:  # 10M+ users
+        severity_score += 4
+    elif affected_users >= 1000000:  # 1M+ users
+        severity_score += 3
+    elif affected_users >= 100000:   # 100K+ users
+        severity_score += 2
+    elif affected_users >= 10000:   # 10K+ users
+        severity_score += 1
+    
+    # Data breach impact scoring
+    if data_breach_gb >= 10000:      # 10TB+ breach
+        severity_score += 4
+    elif data_breach_gb >= 1000:     # 1TB+ breach
+        severity_score += 3
+    elif data_breach_gb >= 100:      # 100GB+ breach
+        severity_score += 2
+    elif data_breach_gb >= 10:       # 10GB+ breach
+        severity_score += 1
+    
+    # Attack type severity multiplier
+    attack_severity_multiplier = {
+        'Ransomware': 1.5,           # Most severe - business disruption
+        'SQL Injection': 1.3,        # High - data theft
+        'Malware': 1.2,              # Medium-high - system compromise
+        'Man-in-the-middle': 1.1,    # Medium - data interception
+        'Phishing': 1.0,             # Medium - social engineering
+        'DDoS': 0.8                  # Lower - service disruption only
+    }
+    
+    # Industry risk multiplier
+    industry_risk_multiplier = {
+        'Banking': 1.4,              # High value data
+        'Healthcare': 1.3,           # Sensitive personal data
+        'Government': 1.3,           # National security implications
+        'IT': 1.2,                   # Technology sector
+        'Telecommunications': 1.1,   # Infrastructure
+        'Retail': 1.0,               # Standard risk
+        'Education': 0.9             # Lower immediate financial impact
+    }
+    
+    # Apply multipliers
+    severity_score *= attack_severity_multiplier.get(attack_type, 1.0)
+    severity_score *= industry_risk_multiplier.get(target_industry, 1.0)
+    
+    # Determine final severity
+    if severity_score >= 6:
         severity = 'Critical'
-    elif affected_users > 100000 or data_breach_gb > 100:
+    elif severity_score >= 3:
         severity = 'Medium'
     else:
         severity = 'Low'
     
+    # Select vulnerability and defense based on attack type, severity, and industry
+    vulnerability_type = vulnerability_options.get(attack_type, ['Weak Passwords', 'Social Engineering', 'Unpatched Software'])
+    defense_mechanism = defense_options.get(attack_type, ['Antivirus', 'Firewall', 'Encryption'])
+    
+    # Industry-specific adjustments
+    industry_vulnerability_preferences = {
+        'Banking': ['Weak Passwords', 'Social Engineering', 'Unpatched Software'],  # Banking focuses on auth
+        'Healthcare': ['Unpatched Software', 'Social Engineering', 'Weak Passwords'],  # Healthcare has legacy systems
+        'Government': ['Unpatched Software', 'Zero Day', 'Social Engineering'],  # Gov has complex systems
+        'IT': ['Zero Day', 'Unpatched Software', 'Social Engineering'],  # IT companies face advanced threats
+        'Telecommunications': ['Unpatched Software', 'Weak Passwords', 'Social Engineering'],  # Telecom infrastructure
+        'Retail': ['Social Engineering', 'Weak Passwords', 'Unpatched Software'],  # Retail focuses on human factors
+        'Education': ['Social Engineering', 'Weak Passwords', 'Unpatched Software']  # Education has user training issues
+    }
+    
+    industry_defense_preferences = {
+        'Banking': ['Encryption', 'AI-based Detection', 'Firewall'],  # Banking prioritizes data protection
+        'Healthcare': ['Encryption', 'Antivirus', 'AI-based Detection'],  # Healthcare needs compliance
+        'Government': ['Firewall', 'Encryption', 'VPN'],  # Government needs network security
+        'IT': ['AI-based Detection', 'Encryption', 'Firewall'],  # IT companies use advanced tech
+        'Telecommunications': ['Firewall', 'VPN', 'Encryption'],  # Telecom needs network protection
+        'Retail': ['Antivirus', 'AI-based Detection', 'Encryption'],  # Retail balances cost and security
+        'Education': ['Antivirus', 'Firewall', 'Encryption']  # Education uses standard protections
+    }
+    
+    # Adjust options based on industry
+    industry_vuln_pref = industry_vulnerability_preferences.get(target_industry, vulnerability_type)
+    industry_def_pref = industry_defense_preferences.get(target_industry, defense_mechanism)
+    
+    # Choose based on severity - higher severity gets more appropriate options for the industry
+    if severity == 'Critical':
+        # For critical incidents, use the most effective option for this industry
+        vulnerability_type = industry_vuln_pref[0]
+        defense_mechanism = industry_def_pref[0]
+    elif severity == 'Medium':
+        # For medium incidents, use secondary option
+        vulnerability_type = industry_vuln_pref[1] if len(industry_vuln_pref) > 1 else industry_vuln_pref[0]
+        defense_mechanism = industry_def_pref[1] if len(industry_def_pref) > 1 else industry_def_pref[0]
+    else:  # Low severity
+        # For low incidents, use tertiary option or fallback
+        vulnerability_type = industry_vuln_pref[2] if len(industry_vuln_pref) > 2 else industry_vuln_pref[0]
+        defense_mechanism = industry_def_pref[2] if len(industry_def_pref) > 2 else industry_def_pref[0]
+    
     return {
         'year': 2024,
-        'incident resolution time (in hours)': resolution_times.get(attack_type, 48),
+        'incident resolution time (in hours)': resolution_time,
         'country': 'UK',
-        'security vulnerability type': vulnerability_mapping.get(attack_type, 'Weak Passwords'),
-        'defense mechanism used': defense_mapping.get(attack_type, 'Antivirus'),
+        'security vulnerability type': vulnerability_type,
+        'defense mechanism used': defense_mechanism,
         'severity_kmeans': severity
     }
 
