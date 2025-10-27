@@ -199,7 +199,7 @@ class Generator:
             from pathlib import Path
             
             # Load the actual dataset
-            csv_file = Path("Digital_Shield_data/proccesed/Cleaned_Digital_Shield_with_severity.csv")
+            csv_file = Path("Digital_Shield_data/processed/Cleaned_Digital_Shield_with_severity.csv")
             if not csv_file.exists():
                 logger.error(f"Dataset file not found: {csv_file}")
                 return None
