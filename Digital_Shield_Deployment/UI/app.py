@@ -1,56 +1,32 @@
 import streamlit as st
-
-
+import os
+from pathlib import Path
 
 from PIL import Image
 import base64
 from io import BytesIO
 
-# # Load image
-# img = Image.open("/home/nouf_talal/code/TwiQcV/Digital_Shield1/Digital_Shield_Deployment/lmags/p1.jpg")
+# Load image
+project_root = Path(__file__).parent.parent
 
-# # Convert image to base64
-# buffered = BytesIO()
-# img.save(buffered, format="JPEG")
-# img_str = base64.b64encode(buffered.getvalue()).decode()
+img = Image.open(project_root / "UI" / "lmags" / "p2.jpg")
 
-# # Display image as HTML banner with fixed height
-# st.markdown(f"""
-# <div style="
-#     width: 100%;
-#     height: 280px;
-#     overflow: hidden;
-#     border-radius: 10px;
-#     margin-bottom: 20px;
-#     position: relative;
-# ">
-#     <img src="data:image/jpeg;base64,{img_str}" style="
-#         width: 100%;
-#         height: 100%;
-#         object-fit: cover;
-#     ">
-# </div>
-# """, unsafe_allow_html=True)
+# Convert image to base64
+buffered = BytesIO()
+img.save(buffered, format="JPEG")
+img_str = base64.b64encode(buffered.getvalue()).decode()
 
-import base64
-
-gif_path = "/home/nouf_talal/code/TwiQcV/Digital_Shield1/Digital_Shield_Deployment/lmags/v2.gif"
-
-# Convert GIF to Base64
-with open(gif_path, "rb") as f:
-    data = f.read()
-gif_base64 = base64.b64encode(data).decode()
-
-# Display GIF with fixed height and rounded corners
+# Display image as HTML banner with fixed height
 st.markdown(f"""
 <div style="
     width: 100%;
-    height: 280px;
+    height: 380px;
     overflow: hidden;
     border-radius: 10px;
     margin-bottom: 20px;
+    position: relative;
 ">
-    <img src="data:image/gif;base64,{gif_base64}" style="
+    <img src="data:image/jpeg;base64,{img_str}" style="
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -58,12 +34,39 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+import base64
 
-# Load local video
-video_path = "/home/nouf_talal/code/TwiQcV/Digital_Shield1/Digital_Shield_Deployment/lmags/v2.mp4"
+# project_root = Path(__file__).parent.parent
+# gif_path = project_root / "UI" / "lmags" / "v3.gif"
 
-# Display video
-st.video(video_path, start_time=0)  #
+# # Convert GIF to Base64
+# with open(gif_path, "rb") as f:
+#     data = f.read()
+# gif_base64 = base64.b64encode(data).decode()
+
+# # Display GIF with fixed height and rounded corners
+# st.markdown(f"""
+# <div style="
+#     width: 100%;
+#     height: 280px;
+#     overflow: hidden;
+#     border-radius: 10px;
+#     margin-bottom: 20px;
+# ">
+#     <img src="data:image/gif;base64,{gif_base64}" style="
+#         width: 100%;
+#         height: 100%;
+#         object-fit: cover;
+#     ">
+# </div>
+# """, unsafe_allow_html=True)
+
+
+# # Load local video
+# video_path = "/home/nouf_talal/code/TwiQcV/Digital_Shield1/Digital_Shield_Deployment/UI/lmags/v2.mp4"
+
+# # Display video
+# st.video(video_path, start_time=0)  #
 
 # ---------- PAGE CONFIG ----------
 st.set_page_config(
