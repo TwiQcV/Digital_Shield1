@@ -129,10 +129,10 @@ class DataLoader:
         # Build paths using os.path.join for cross-platform compatibility
         # Try multiple possible directory structures
             possible_data_dirs = [
-            os.path.join(project_root, 'Digital_Shield_data', 'proccesed'),
-            os.path.join(project_root, 'Digital_Shield1', 'Digital_Shield_data', 'proccesed'),
-            os.path.join(project_root, '..', 'Digital_Shield_data', 'proccesed'),  # One level up
-            os.path.join(project_root, '..', 'Digital_Shield1', 'Digital_Shield_data', 'proccesed'),  # One level up
+            os.path.join(project_root, 'Digital_Shield_data', 'processed'),
+            os.path.join(project_root, 'Digital_Shield1', 'Digital_Shield_data', 'processed'),
+            os.path.join(project_root, '..', 'Digital_Shield_data', 'processed'),  # One level up
+            os.path.join(project_root, '..', 'Digital_Shield1', 'Digital_Shield_data', 'processed'),  # One level up
         ]
 
         csv_filenames = []

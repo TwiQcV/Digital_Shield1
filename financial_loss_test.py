@@ -202,15 +202,19 @@ def get_smart_defaults(attack_type, target_industry, affected_users, data_breach
     # Calculate resolution time based on severity
     base_time = base_resolution_times.get(attack_type, 24)
     
-    # Adjust resolution time based on affected users and data breach size
+    # Adjust resolution time based on affected users and data breach size - More logical scaling
     if affected_users >= 1000000 or data_breach_gb >= 1000:
-        resolution_time = base_time * 2.5  # Major incidents take longer
+        resolution_time = base_time * 3.0  # Major incidents take much longer
     elif affected_users >= 100000 or data_breach_gb >= 100:
-        resolution_time = base_time * 1.8  # Medium incidents
+        resolution_time = base_time * 2.0  # Large incidents take longer
     elif affected_users >= 10000 or data_breach_gb >= 10:
-        resolution_time = base_time * 1.3  # Small incidents
+        resolution_time = base_time * 1.5  # Medium incidents take longer
+    elif affected_users >= 1000 or data_breach_gb >= 1:
+        resolution_time = base_time * 1.2  # Small incidents take slightly longer
+    elif affected_users >= 100 or data_breach_gb >= 0.1:
+        resolution_time = base_time * 1.1  # Minimal incidents take slightly longer
     else:
-        resolution_time = base_time  # Minimal impact
+        resolution_time = base_time  # Very minimal impact
     
     # Cap resolution time at reasonable limits
     resolution_time = min(resolution_time, 168)  # Max 1 week
@@ -238,7 +242,7 @@ def get_smart_defaults(attack_type, target_industry, affected_users, data_breach
     # Calculate severity based on multiple factors (more realistic conditions)
     severity_score = 0
     
-    # User impact scoring
+    # User impact scoring - Even more granular thresholds for better differentiation
     if affected_users >= 10000000:  # 10M+ users
         severity_score += 4
     elif affected_users >= 1000000:  # 1M+ users
@@ -247,8 +251,16 @@ def get_smart_defaults(attack_type, target_industry, affected_users, data_breach
         severity_score += 2
     elif affected_users >= 10000:   # 10K+ users
         severity_score += 1
+    elif affected_users >= 1000:    # 1K+ users
+        severity_score += 0.8
+    elif affected_users >= 500:     # 500+ users
+        severity_score += 0.6
+    elif affected_users >= 100:     # 100+ users
+        severity_score += 0.4
+    elif affected_users >= 50:      # 50+ users
+        severity_score += 0.2
     
-    # Data breach impact scoring
+    # Data breach impact scoring - Even more granular thresholds for better differentiation
     if data_breach_gb >= 10000:      # 10TB+ breach
         severity_score += 4
     elif data_breach_gb >= 1000:     # 1TB+ breach
@@ -257,6 +269,14 @@ def get_smart_defaults(attack_type, target_industry, affected_users, data_breach
         severity_score += 2
     elif data_breach_gb >= 10:       # 10GB+ breach
         severity_score += 1
+    elif data_breach_gb >= 5:        # 5GB+ breach
+        severity_score += 0.8
+    elif data_breach_gb >= 1:        # 1GB+ breach
+        severity_score += 0.6
+    elif data_breach_gb >= 0.5:      # 500MB+ breach
+        severity_score += 0.4
+    elif data_breach_gb >= 0.1:      # 100MB+ breach
+        severity_score += 0.2
     
     # Attack type severity multiplier
     attack_severity_multiplier = {
@@ -283,10 +303,12 @@ def get_smart_defaults(attack_type, target_industry, affected_users, data_breach
     severity_score *= attack_severity_multiplier.get(attack_type, 1.0)
     severity_score *= industry_risk_multiplier.get(target_industry, 1.0)
     
-    # Determine final severity
-    if severity_score >= 6:
+    # Determine final severity - Adjusted thresholds to ensure Critical is achievable
+    if severity_score >= 5:
         severity = 'Critical'
-    elif severity_score >= 3:
+    elif severity_score >= 2.5:
+        severity = 'High'
+    elif severity_score >= 1.2:
         severity = 'Medium'
     else:
         severity = 'Low'
@@ -323,6 +345,10 @@ def get_smart_defaults(attack_type, target_industry, affected_users, data_breach
     # Choose based on severity - higher severity gets more appropriate options for the industry
     if severity == 'Critical':
         # For critical incidents, use the most effective option for this industry
+        vulnerability_type = industry_vuln_pref[0]
+        defense_mechanism = industry_def_pref[0]
+    elif severity == 'High':
+        # For high incidents, use the most effective option for this industry
         vulnerability_type = industry_vuln_pref[0]
         defense_mechanism = industry_def_pref[0]
     elif severity == 'Medium':

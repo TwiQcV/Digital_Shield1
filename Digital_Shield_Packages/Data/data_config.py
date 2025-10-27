@@ -12,7 +12,7 @@ RAW_DATA_PATH = os.path.join(
 CLEANED_DATA_PATH = os.path.join(
     os.path.expanduser("~"),
     "code", "TwiQcV", "Digital_Shield1",
-    "Digital_Shield_data", "proccesed", "Digital_Shield_cleaned.csv"
+    "Digital_Shield_data", "processed", "Digital_Shield_cleaned.csv"
 )
 
 # Text columns to normalize

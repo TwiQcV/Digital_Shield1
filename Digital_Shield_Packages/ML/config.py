@@ -31,7 +31,7 @@ DATA_PATH = path_list = [
         os.path.join(
         os.path.expanduser("~"),
         "code", "TwiQcV", "Digital_Shield1",
-        "Digital_Shield_data", "proccesed", "Data Augmentetion.csv"
+        "Digital_Shield_data", "processed", "Data Augmentetion.csv"
     ),
     os.path.join(".", "Data Augmentetion.csv"),
     os.path.join(".", "Data Augmentation.csv")

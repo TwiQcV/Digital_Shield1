@@ -65,6 +65,8 @@ class GeminiProvider:
             - Be concise and professional
             - Provide actionable insights
             - If data is not available, say so clearly
+            - DO NOT reference specific incident numbers, IDs, or dataset identifiers
+            - Focus on patterns, trends, and actionable recommendations
             
             **CYBERSECURITY ANALYSIS DATA:**
             {context}
@@ -86,7 +88,14 @@ class GeminiProvider:
             # Remove any document IDs or chunk references
             response_text = re.sub(r'Document \d+', '', response_text)
             response_text = re.sub(r'Chunk \d+', '', response_text)
+            # Enhanced incident number removal - catch various formats
             response_text = re.sub(r'Incident \d+', '', response_text)
+            response_text = re.sub(r'incident \d+', '', response_text)
+            response_text = re.sub(r'Incident\s+\d+', '', response_text)
+            response_text = re.sub(r'incident\s+\d+', '', response_text)
+            # Remove standalone incident numbers that might appear
+            response_text = re.sub(r'\bIncident\b\s*\d+', '', response_text)
+            response_text = re.sub(r'\bincident\b\s*\d+', '', response_text)
             # Clean up multiple spaces but preserve single spaces
             response_text = re.sub(r' {2,}', ' ', response_text).strip()
             
@@ -113,7 +122,14 @@ class GeminiProvider:
         clean_context = re.sub(r'#\d{4,}', '', context)  # Only remove 4+ digit IDs
         clean_context = re.sub(r'Document \d+', '', clean_context)
         clean_context = re.sub(r'Chunk \d+', '', clean_context)
+        # Enhanced incident number removal - catch various formats
         clean_context = re.sub(r'Incident \d+', '', clean_context)
+        clean_context = re.sub(r'incident \d+', '', clean_context)
+        clean_context = re.sub(r'Incident\s+\d+', '', clean_context)
+        clean_context = re.sub(r'incident\s+\d+', '', clean_context)
+        # Remove standalone incident numbers that might appear
+        clean_context = re.sub(r'\bIncident\b\s*\d+', '', clean_context)
+        clean_context = re.sub(r'\bincident\b\s*\d+', '', clean_context)
         clean_context = re.sub(r' {2,}', ' ', clean_context).strip()  # Only clean multiple spaces
         
         return f"""
