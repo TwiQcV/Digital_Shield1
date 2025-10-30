@@ -19,7 +19,7 @@ A real-time overview of all cybersecurity metrics including:
 - Financial loss analysis  
 - Risk levels per region or attack type  
 
-![Main Dashboard](./Digital_Shield_UI/images/main_dashboard.jpg)
+![Main Dashboard](./Digital_Shield_UI/lmags/main_dashboard.jpg)
 
 ---
 
@@ -32,7 +32,7 @@ A predictive model that estimates financial damage based on attack parameters su
 
 When a high-risk result is detected, the system recommends consulting Hima, the AI cybersecurity assistant, for guidance.
 
-![Financial Loss Model](./Digital_Shield_UI/images/financial_loss_model.png)
+![Financial Loss Model](./Digital_Shield_UI/lmags/financial_loss_model.png)
 
 ---
 
@@ -45,7 +45,7 @@ Users can:
 - Seek business-specific recommendations  
 - Get instant, actionable responses  
 
-![Hima Chatbot](./Digital_Shield_UI/images/hima_chatbot.jpg)
+![Hima Chatbot](./Digital_Shield_UI/lmags/hima_chatbot.jpg)
 
 ---
 
@@ -57,7 +57,7 @@ A quick-access library of essential security knowledge — all in one place:
 
 This center helps security teams learn faster and act with clarity during incidents.
 
-![Cybersecurity Information Center](./Digital_Shield_UI/images/cyber_info_center.jpg)
+![Cybersecurity Information Center](./Digital_Shield_UI/lmags/cyber_info_center.jpg)
 
 ---
 
@@ -100,6 +100,7 @@ For inquiries or collaboration opportunities:
 🌐 [LinkedIn - Nawaf Alfify](https://www.linkedin.com/in/nawaf-alfify-8382a9368/)
 🌐 [LinkedIn - Nouf Alhothly](https://www.linkedin.com/in/nouf-alhothly/)
 🌐 [LinkedIn - Majid AlShehri](https://www.linkedin.com/in/rawaf-alnajjar-899b18263/)
+
 
 
 
